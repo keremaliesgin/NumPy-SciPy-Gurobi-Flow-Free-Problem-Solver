@@ -72,6 +72,7 @@ How it works:
   Now that we have finished constraint generation, concatenate all of the data to use in A matrix. And then, we craft A matrix as a sparse matrix, and hand everything to the solver. With the plot_solution function I borrowed from AI, we can visually see the result.
 
   Let's move onto how heuristic approaches work. In this formulation, we have four different approaches, each being foul-proof (I believe, as a Flow enthusiast with more than 4 years of streak):
+  
       1: Apply Forced Moves: This function scans the board, checks for filled cells, scans their neighbors and if they have exactly one empty neighbor and they are NOT done with their connections, it colors the empty cell with the same color. This is loop-able, meaning that, under nice conditions, this can fill the ENTIRE board by itself.
       2: Apply Corner Moves: This uses a dynamically crafted roadmap dictionary to get the valid paths that could be filled. Then, fills the corner appropiately, if conditions are met. There was no need to make this loop-able, so we run this only once.
       3: Fill In-Between: We scan the edges, look for pairs of cells with the same color and check the length of empty distances. If the distance between two cell with the same color is 1 or 2, with no interruptions, then we fill the entire gap with the same color. This is also loop-able, so even if it does not run in the first loop, it might in the second.
