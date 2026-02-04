@@ -294,6 +294,10 @@ print(flow_free_solver_with_graph(board))
 
 def flow_free_solver_with_heuristics(board):
 
+    # ----------------------------------------------------------------------------
+    # decision variables: x_k_h_w: 1 if color k is in row h and col w, 0 otherwise
+    # ----------------------------------------------------------------------------
+
     # --------------
     # initialization
     # --------------
@@ -512,7 +516,7 @@ def flow_free_solver_with_heuristics(board):
     # logic: for each edge, we check for a specific condition: there exists two colors on the same edge with distance less than three
     # if that is the case, we end up filling the empty distance
 
-    def fill_in_between_enhanced(current_board):
+    def fill_in_between(current_board):
         actually_changed = False
         
         edges = []
@@ -583,7 +587,6 @@ def flow_free_solver_with_heuristics(board):
                     neighbor_color = current_board[nh][nw]
                     if neighbor_color == 0: continue
 
-
                     is_terminal = (nh, nw) in true_terminals_set
 
                     if is_terminal:
@@ -616,12 +619,10 @@ def flow_free_solver_with_heuristics(board):
     # here, we keep returning a boolean value to keep the loop running until no change occurs
     while global_change:
         is_changed_after_first = apply_forced_moves(board_heuristics)
-        is_changed_after_third = fill_in_between_enhanced(board_heuristics)
+        is_changed_after_third = fill_in_between(board_heuristics)
         is_changed_after_fourth = apply_bottleneck_moves(board_heuristics)
         global_change = is_changed_after_first or is_changed_after_third or is_changed_after_fourth
 
-    # as this heuristic is inefficient, we run it only once
-    # fill_in_between(board_heuristics)
     # print(board_heuristics) # uncomment to see the current state after all of the heuristics
 
     # this is clever: for some boards, heuristics will fill the entire board.
