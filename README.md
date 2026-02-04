@@ -53,9 +53,11 @@ How it works:
           Constraint 1: Every cell must be filled with exactly one color.
               --> sum over k in {1, ..., K} x_k_h_w = 1 for h in {1, ..., H} and w in {1, ..., W}
                   # as we can see, we have H * W rows with K elements in each. every element has the coefficient 1. for the col indices, we take a range; reshape, transpose and flatten it.
+                  # for senses and b, they are just "E" and 1 repeated
           Constraint 2: Every terminal cell must have exactly one neighbor with the same color.
               --> sum of neighbors with same colors = 1 for every terminal
                   # luckily, we already had the locations of terminals as numerical values, with the help of helper functions, we quickly iterate on the terminals, gather the exact col, row and aij values. one thing to note is how we use current_row_counter to not overwrite the existing constraints.
+                  # for senses and b, they are just "E" and 1, repeated
           Constraint 3: Every non-terminal cell must have exactly two neighbors with the same color.
               --> this constraint has two parts (let me denote the empty cell with the desired color as 'x', with its neighbors' sum as 'sum'):
                     # x = 1: we want the sum to be exactly two, as x is a flow
@@ -67,7 +69,17 @@ How it works:
                   this is clever, as if x = 1, then from 3a, sum >= 2 and from 3b, sum <= 2, effectively squeezing the sum to 2. if x = 0, 0 <= sum <= 4, as it should be.
                   we handle these constraints in two parts: generating the aij, row and col indices for x values and neighbors separately. we generate senses and b in one go though
         
-  Now that we have finished               
+  Now that we have finished constraint generation, concatenate all of the data to use in A matrix. And then, we craft A matrix as a sparse matrix, and hand everything to the solver. With the plot_solution function I borrowed from AI, we can visually see the result.
+
+  Let's move onto how heuristic approaches work. In this formulation, we have four different approaches, each being foul-proof (I believe, as a Flow enthusiast with more than 4 years of streak):
+      1: Apply Forced Moves: This function scans the board, checks for filled cells, scans their neighbors and if they have exactly one empty neighbor and they are NOT done with their connections, it colors the empty cell with the same color. This is loop-able, meaning that, under nice conditions, this can fill the ENTIRE board by itself.
+      2: Apply Corner Moves: This uses a dynamically crafted roadmap dictionary to get the valid paths that could be filled. Then, fills the corner appropiately, if conditions are met. There was no need to make this loop-able, so we run this only once.
+      3: Fill In-Between: We scan the edges, look for pairs of cells with the same color and check the length of empty distances. If the distance between two cell with the same color is 1 or 2, with no interruptions, then we fill the entire gap with the same color. This is also loop-able, so even if it does not run in the first loop, it might in the second.
+      4: Apply Bottleneck Moves: We look for empty cells with exactly 0 or 1 empty neighbors. Then, we iterate over their neighbors and if ONLY one of the neighbors is eligible to make connection to that cell, then we color that empty cell with the neighbor that is eligible to make the connection. Again, this is loop-able, so it would work even if it did not before.
+
+  With all of the explanations, we run these functions in a loop (except corner move heuristic) and keep the loop running until no change occurs. After that, if the board is completely filled, we simply exit the program without crafting the rest of the model. If not, then we force the lower bounds one more time, and move on from that.
+
+  With all of these, you can hand a Numberlink/Flow Free problem to the solver and watch it filling all of the cells!
   
 
 
