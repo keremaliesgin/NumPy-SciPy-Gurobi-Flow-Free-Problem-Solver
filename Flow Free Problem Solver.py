@@ -338,7 +338,6 @@ def flow_free_solver_with_heuristics(board):
     for h, w in np.argwhere(board != 0):
         l[get_index(board[h][w] - 1, h, w)] = 1
     u = np.ones((total_vars))
-
     
     # here, we save the indices of terminals
     all_terminal_indices = np.array(sorted([get_index(board[h][w] - 1, h, w) for h, w in np.argwhere(board != 0)]))
@@ -641,7 +640,7 @@ def flow_free_solver_with_heuristics(board):
     # constraints
     # -----------
 
-    # constraint 1: each cell may contain only one color
+    # constraint 1: each cell must contain exactly one color
 
     aij_1 = np.repeat(1, total_vars)
     row_1 = np.repeat(range(H * W), K)
